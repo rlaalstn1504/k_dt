@@ -22,8 +22,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-API_KEY = os.getenv('API_KEY')
-openai.api_key = API_KEY 
+API_KEY = os.getenv("API_KEY")
+openai.api_key = API_KEY
 
 def get_project_root() -> str:
     """Returns project root path."""
@@ -31,7 +31,6 @@ def get_project_root() -> str:
 
 def ask_gpt3(question):
     response = openai.ChatCompletion.create(
-        #model="gpt-4-turbo-preview", # 챗 모델을 사용하는 경우 적절한 모델 이름으로 변경
         model="gpt-3.5-turbo", # 챗 모델을 사용하는 경우 적절한 모델 이름으로 변경
         messages=[
             #{"role": "system", "content": "You are a helpful assistant."},
@@ -81,30 +80,36 @@ if __name__ == "__main__":
         if video_example is not None and question:
             # 비디오 처리 및 질문에 대한 응답 로직을 여기에 추가
             st.success("사진과 질문이 제출되었습니다.")
-            answer = ask_gpt3(f"이 질문에 니가 마치 의사인 것 처럼 가정해서 병명을 진단하고 답변해줘: {question}")
+            answer = ask_gpt3(f"우린 역할극을 할거야. 이 질문에 니가 마치 의사인 것 처럼 가정해서 병명을 진단하고 답변해줘: {question}")
             col1.write(f'질문 : {question}')
             col1.write(f'답변 : {answer}')
-            col1.video(video_example)
+            col1.image(video_example)
             
+        
+        
+        elif video_example is None and question:
+            st.success("질문이 제출되었습니다.")
+            answer = ask_gpt3(f"우린 역할극을 할거야. 이 질문에 니가 마치 의사인 것 처럼 가정해서 병명을 진단하고 답변해줘: {question}")
+            col1.write(f'질문 : {question}')
+            col1.write(f'답변 : {answer}')
+        
         elif video_example.size > MAX_FILE_SIZE:
             st.error("The uploaded file is too large. Please upload an image smaller than 300MB.")
+            
         else:
             # 필수 입력이 없을 경우 사용자에게 알림
             st.error("비디오 파일과 질문을 모두 제공해주세요.")
             
     example_videos = sorted(glob.glob(f'{get_project_root()}/examples/*'))
     example_questions_short = ['전혀 안간지러운데 습진인가요?',
-                               '엄지 발톱은 점점 하얗게 되더니..',
+                               '두통이 점점 심해져요..',
                                '수두일까요?',
                                '어금니에 검정색 점.. 이거 충치겠죠..?']
     
     example_questions_full = ['''지금 제 손이랑 팔 안쪽 다리쪽에 습진처럼 생긴게 생겻는데 손에 오돌토돌하게 나는것도 
                               같은병인가요? 그리고 전혀 안간지러운데 습진이 맞나요?''',
                               
-                        '''엄지발톱은 점점 하얗게 되더니 사진에서처럼 발톱이 아래에서 떨어지면서 빠지려고 하더라구요
-                        네번째 발톱은 검게 변했는데 이게 손으로 발톱을 당기니까 조금 들썩거리더라구요
-                        그때쯤에 제가 좀 강하게 뛰어다녀서 발가락에 강한충격을 줬던 기억이 있어서 시간
-                        지나면 좋아지겠지 싶었는데 최근에 오른발의 새끼발가락이 위에 말한 엄지발톱처럼 벗겨지려고 하더라구요''',
+                        '''더위에 외출하고 나서 두통이 점점 심해지는데 열사병일까요?''',
                         
                         '''
                         주말 남해근교에서 갯벌체험과 펜션에서 숙박했고 제트스파에서 잠수도 하고 놀았음
@@ -131,9 +136,8 @@ if __name__ == "__main__":
                           약물 치료가 필요할 수 있어 가까운 피부과에 내원을 통해 
                           증상에 맞는 약을 처방 받아 복용하실 것을 권유드려요.""",
                           
-                        '''안녕하세요. 대한의사협회 상담의사 ~~ 입니다.
-                        무좀이 의심되는 부분도 있습니다. 발톱이 빠지는 것은 발톱이 긴상태에서
-                        뛰었거나 꼭 끼는 신발을 신고 뛰어서 그럴가능성이 높습니다''',
+                        '''안녕하세요. 대한의사협회 상담의사 호빵맨입니다. 
+                        혹시 덥다고 아이스크림을 드시진 않으셨는지요?''',
                         
                         """
                         안녕하세요. 대한의사협회·네이버 지식iN 상담의사 김태형 입니다.
