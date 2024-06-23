@@ -1,0 +1,6 @@
+[server]
+port = 7777
+baseUrlPath = "/url_path/"
+
+[browser]
+serverAddress = "0.0.0.0"
