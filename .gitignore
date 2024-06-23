@@ -1,0 +1,5 @@
+.env
+tempfile.mp4
+/output
+__pycache__/
+*.pth
