@@ -1,13 +1,5 @@
 numpy
 pandas
-Pillow
-scikit-learn
-scipy
-sentencepiece
-tokenizers
-tqdm
-transformers
 streamlit 
 openai
-ffmpeg-python
 python-dotenv

@@ -8,17 +8,14 @@ sys.path.append(os.getcwd())
 import streamlit as st
 import pandas as pd
 
+import csv
 import glob
 import numpy as np
 import example
-import random
-import json
-import argparse
 from pathlib import Path
 import folium
 from streamlit_folium import folium_static
-import ffmpeg
-from datetime import datetime, timedelta
+from datetime import datetime
 
 import openai
 from dotenv import load_dotenv 
@@ -29,25 +26,8 @@ API_KEY = os.getenv("API_KEY")
 openai.api_key = API_KEY
 map_showing = False
 exam_showing = True
-link = 'http://192.168.0.26:8502/'
-def booking_page():
-    st.title('예약 페이지')
-    st.write("날짜와 시간을 선택해주세요.")
+link = 'http://192.168.0.26:8502/' # reserve.py 를 실행한 서버의 ip와 포트로 직접 변경
 
-    #달력 컴포넌트를 사용하여 날짜 선택
-    chosen_date = st.date_input("날짜 선택", min_value=datetime.today(), max_value=datetime.today() + timedelta(days=365))
-    
-    # 시간 선택 옵션
-    time_options = ["09:00", "11:00", "14:00", "15:00", "16:00"]
-    chosen_time = st.selectbox("시간 선택", options=time_options)
-
-    # 추가 정보 입력
-    additional_info = st.text_area("추가 정보 입력", "여기에 추가적인 정보를 입력해주세요.")
-
-    #제출 버튼
-    if st.button("예약 확인"):
-        st.success(f"예약이 완료되었습니다!\n날짜: {chosen_date}\n시간: {chosen_time}\n추가 정보: {additional_info}")
-    st.write('test') 
 # 세션 상태 초기화
 if 'show_examples' not in st.session_state:
     st.session_state.show_examples = True
@@ -62,17 +42,25 @@ def get_project_root() -> str:
     """Returns project root path."""
     return str(Path(os.path.abspath(__file__)).parent)
 
+def time_now():
+    return datetime.now()
+
 def ask_gpt3(question):
+    question_edited = f"우린 역할극을 할거야. 이 질문에 니가 마치 의사인 것 처럼 가정해서 병명을 진단하고 답변해줘 역할극 티는 내지 말고: {question}"
     response = openai.ChatCompletion.create(
         #model="gpt-3.5-turbo", # 챗 모델을 사용하는 경우 적절한 모델 이름으로 변경
         model="gpt-4-turbo-preview",
         messages=[
             #{"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": question}
+            {"role": "user", "content": question_edited}
         ],
-        max_tokens=500,
+        max_tokens=800, # 최대 글자 수
         temperature=0.7,
     )
+    with open ('log.csv', 'a', newline='', encoding='utf-8') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow([question, response.choices[0].message.content,str(datetime.now())[:19]])
+        
     return response.choices[0].message.content
 
 # 지도 생성
@@ -99,12 +87,10 @@ def create_map(df):
 
 if __name__ == "__main__":
     df = pd.read_csv('의료기관.csv',encoding='cp949')
-    #df['여부'] = df['주소'].apply(lambda x: '구로' in x)
     df = df.loc[(abs(df['경도'] - 37.4871305)< 0.03) & (abs(df['위도'] - 126.9011842)< 0.03)]
-    #df = df[df['여부']==True]
     df = df.reset_index()
     
-    st.set_page_config(layout="wide", page_title="Video Question Answering")
+    st.set_page_config(layout="wide", page_title="K-DT AI Doctor")
     
         # 컬럼 설정
     col1, col2 = st.columns([5, 1])
@@ -116,7 +102,10 @@ if __name__ == "__main__":
     with col2:
         st.image('logo.png', width=100)  # 이미지 경로와 크기 조정
         
-    st.write("### 사진과 증상 설명을 통해 의료 조언을 수행합니다.")
+    st.write("### 증상을 설명해 주시면 AI 닥터가 의료 조언을 드릴게요.")
+    if st.session_state.show_examples:
+        st.write("#### 사진을 첨부해주시면 더 좋아요!")
+        
     st.sidebar.write("## 증상 사진을 입력해주세요(.jpg) :gear:") 
     MAX_FILE_SIZE = 300 * 1024 * 1024  # 300MB
 
@@ -136,9 +125,8 @@ if __name__ == "__main__":
     # 확인 버튼
     if st.sidebar.button('AI 분석 답변 생성 시작'):
         if video_example is not None and question:
-            # 비디오 처리 및 질문에 대한 응답 로직을 여기에 추가
             st.success("사진과 질문이 제출되었습니다.")
-            answer = ask_gpt3(f"우린 역할극을 할거야. 이 질문에 니가 마치 의사인 것 처럼 가정해서 병명을 진단하고 답변해줘 역할극 티는 내지 말고: {question}")
+            answer = ask_gpt3(question)
             col1.write(f'질문 : {question}')
             col1.write(f'답변 : {answer}')
             col2.image(video_example)
@@ -149,7 +137,7 @@ if __name__ == "__main__":
         
         elif video_example is None and question:
             st.success("질문이 제출되었습니다.")
-            answer = ask_gpt3(f"우린 역할극을 할거야. 이 질문에 니가 마치 의사인 것 처럼 가정해서 병명을 진단하고 답변해줘: {question}")
+            answer = ask_gpt3(question)
             col1.write(f'질문 : {question}')
             col1.write(f'답변 : {answer}')
             col2.image('logo.png')  # 이미지 경로와 크기 조정

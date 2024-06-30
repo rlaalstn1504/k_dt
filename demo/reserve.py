@@ -1,5 +1,6 @@
 import streamlit as st
 from datetime import datetime, timedelta
+import csv
 
 def main():
     st.title('예약 시스템')
@@ -20,6 +21,9 @@ def main():
     # 예약 확인 버튼
     if st.button("예약 확인"):
         # 예약 정보 확인 메시지 표시
+        with open ('reserve.csv', 'a', newline='', encoding='utf-8') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow([text_input_name, text_input, chosen_gender, chosen_time])
         st.success(f"\n날짜: {chosen_date}\n {chosen_time} {text_input_name}님 예약이 완료되었습니다.")
 
 if __name__ == "__main__":
