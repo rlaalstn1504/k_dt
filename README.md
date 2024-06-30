@@ -43,7 +43,7 @@
 #### 필수 라이브러리 설치
 
 ```bash
-pip3 install -r requirements.txt
+pip install -r requirements.txt
 ```  
 
 
@@ -52,7 +52,7 @@ pip3 install -r requirements.txt
 demo 폴더 내 'app.py' 파일을 다음 명령어를 사용하여 실행하면, 웹페이지를 통해 모델을 직접 테스트해 볼 수 있습니다.  
 streamlit run demo/app.py
 
-루트 경로에 .env 파일을 만들어, 아래 형식으로 CHATGPT API 정보를 넣어야 AI 챗봇 기능이 동작합니다.
+루트 경로에 .env 파일을 만들어, 아래 형식으로 CHATGPT API 정보를 넣어야 AI 챗봇 기능이 동작합니다.<br>
 API_KEY = 본인이 발급받은 api 키
 
 예약시스템 동작을 위해서는 별도의 서버를 추가로 띄워줘야 합니다.
