@@ -1,5 +1,7 @@
 numpy
 pandas
-streamlit 
-openai
+streamlit
+folium
+streamlit-folium
+openai==0.28.0
 python-dotenv
